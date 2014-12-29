@@ -1,0 +1,13 @@
+{
+	"author": "TJ Horner <me@horner.tj>",
+	"name": "steam-goddammit-bot",
+	"description": "A chat bot for Steam",
+	"version": "1.0.0",
+	"repository": {
+		"type": "git",
+		"url": "https://github.com/tjhorner/steam-goddammit-bot"
+	},
+	"dependencies": {
+		"steam": "~0.6.7"
+	}
+}
