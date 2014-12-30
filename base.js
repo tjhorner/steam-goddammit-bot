@@ -5,7 +5,6 @@ fs.writeFile("log.txt", "");
 
 function log(message){
 	console.log("[LOG] ".green + message);
-	
 	fs.appendFile("log.txt", "[LOG] " + message + "\n", function (err) {
 		if(err) console.warn("Couldn't write to log file!");
 	});
@@ -46,6 +45,15 @@ Array.prototype.contains = function(k, callback) {
 }
 
 Commands = [];
+
+function findUserByName(name, bot, onMatch){
+	for(var id in bot.users){
+		var user = bot.users[id];
+		if(user.playerName.toLowerCase().startsWith(name.toLowerCase())){
+			onMatch(bot.users[id]);
+		}
+	}
+}
 
 function processChatMessage(src, src2, msg, bot){
 	if(msg !== ""){
@@ -111,5 +119,6 @@ module.exports = {
 		"13": "Ranking data was not set",
 		"14": "My rank is invalid"
 	},
-	config: config
+	config: config,
+	findUserByName: findUserByName
 };

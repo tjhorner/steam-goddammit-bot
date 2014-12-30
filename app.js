@@ -6,6 +6,12 @@ var colors = require('colors');
 
 var chatRooms = [];
 
+if (typeof String.prototype.startsWith !== 'function') {
+	String.prototype.startsWith = function (str){
+		return this.slice(0, str.length) == str;
+	};
+}
+
 function bashEscape(s){
 	return s.replace(/\$/g, "\\$")
 	        .replace(/'/g, "\\'")
@@ -21,7 +27,7 @@ var bot = new Steam.SteamClient();
 app.Command(/^!bcast\b/, "!bcast [message]", "Broadcast a message to all encountered users (only available to elevated users)", function(src, msg, steamId){
 	if(app.isElevated(steamId)){
 		var users = 0;
-		for (var id in bot.users) {
+		for(var id in bot.users) {
 			users++;
 			bot.sendMessage(id, msg.substr(7));
 			app.log("Sent broadcast message to " + bot.users[id].playerName + " (" + id + ")");
@@ -100,6 +106,12 @@ app.Command(/^!myid\b/, "!myid", "Shows the SteamID of yourself and, if in a cha
 	if(src !== steamId){
 		bot.sendMessage(src, "This chat room's SteamID is " + src);
 	}
+});
+
+app.Command(/^!lookup\b/, "!lookup [partial username]", "Find a user's SteamID by the first part of their username (I must have met them as a friend or in a group chat)", function(src, msg, steamId){
+	app.findUserByName(msg.substr(8).toLowerCase(), bot, function(user){
+		bot.sendMessage(src, "\nMatch:\nUsername: " + user.playerName + "\nSteamID: " + user.friendid);
+	});
 });
 
 app.Command(/^!elevatedusers\b/, "!elevatedusers", "Get the profile URLs of current elevated users.", function(src, msg, steamId){
