@@ -1,9 +1,14 @@
 var Steam = require('steam');
 var fs = require('fs');
 var os = require('os');
+var colors = require('colors');
 
 var app = require('./base.js');
-var config = require('./config.js');
+try{
+	var config = require('./config.js');
+}catch(e){
+	console.error('No config.js found!')
+}
 var chatRooms = [];
 
 function bashEscape(s){
@@ -65,11 +70,19 @@ app.Command(/^!friend\b/, "!friend [steamid]", "Send a friend request to the spe
 	bot.sendMessage(src, "Attempting to friend " + msg.substr(8));
 });
 
-app.Command(/^!myid\b/, "!id", "Shows the SteamID of yourself and, if in a chat room, the current room you are in", function(src, msg, steamId){
+app.Command(/^!myid\b/, "!myid", "Shows the SteamID of yourself and, if in a chat room, the current room you are in", function(src, msg, steamId){
 	bot.sendMessage(src, "Your SteamID is " + steamId);
 	if(src !== steamId){
 		bot.sendMessage(src, "This chat room's SteamID is " + src);
 	}
+});
+
+app.Command(/^!elevatedusers\b/, "!elevatedusers", "Get the profile URLs of current elevated users.", function(src, msg, steamId){
+	var message = "\nProfile URLs of elevated users:";
+	app.elevatedUsers(bot).forEach(function(user){
+		message += "\nhttp://steamcommunity.com/profiles/" + user;
+	});
+	bot.sendMessage(src, message);
 });
 
 app.Command(/node.js/gi, "node.js", "The only real dev language", function(src, msg, steamId){
@@ -78,7 +91,7 @@ app.Command(/node.js/gi, "node.js", "The only real dev language", function(src, 
 
 fs.readFile('.sentry', function(e, d){
 	if(e){
-		console.warn("No sentry file found, you may need to use a SteamGuard code.");
+		app.warn("No sentry file found, you may need to use a SteamGuard code.");
 		bot.logOn({
 			accountName: config.steamUsername,
 			password: config.steamPassword
@@ -93,11 +106,11 @@ fs.readFile('.sentry', function(e, d){
 });
 
 bot.on('loggedOn', function(){
-	console.log("Successfully logged in! Clearing Steam password from config...");
+	app.log("Successfully logged in! Clearing Steam password from config...");
 	config.steamPassword = null;
 	bot.setPersonaState(Steam.EPersonaState.Online);
 	bot.setPersonaName(config.botName); // You may want to comment this out if you're restarting a lot.
-	console.log("Joining bot community chat...");
+	app.log("Joining bot community chat...");
 	bot.joinChat(config.communityChatId);
 });
 
@@ -111,7 +124,7 @@ bot.on('message', function(source, message, type, chatter){
 
 bot.on('chatInvite', function(chatId, chatName, inviterId){
 	bot.joinChat(chatId);
-	console.log("Joining chat room " + chatId + " (" + chatName + ")");
+	app.log("Joining chat room " + chatId + " (" + chatName + ")");
 	bot.sendMessage(inviterId, "Joining " + chatName + "...");
 	chatRooms[chatId] = inviterId;
 });
@@ -123,7 +136,7 @@ bot.on('friend', function(steamId, relation){
 			setTimeout(function(){
 				var newFriend = bot.users[steamId].playerName;
 				bot.sendMessage(steamId, "Hi " + newFriend + "! I'm " + config.botName + ". I can do many things. Type !help for more info.");
-				console.log("New friend! " + steamId + " (" + newFriend + ")");
+				app.log("New friend! " + steamId + " (" + newFriend + ")");
 				// exec('notify-send "' + bashEscape('New Friend!') + '" "' + bashEscape(newFriend) + '"');
 			}, 2000);
 			break;
@@ -132,11 +145,11 @@ bot.on('friend', function(steamId, relation){
 
 bot.on('chatEnter', function(chatId, response){
 	if(response !== 1){
-		console.warn("Could not join " + chatId + "! Error code " + response);
+		app.warn("Could not join " + chatId + "! Error code " + response);
 		bot.sendMessage(chatRooms[chatId], "Couldn't enter chat room: " + app.ChatErrors[String(response)]);
 		chatRooms[chatId] = "";
 	}else{
-		console.log("Joined chat room " + chatId);
+		app.log("Joined chat room " + chatId);
 		bot.sendMessage(chatId, "\n" + config.botName + " online with Node.js " + process.version + ".\nBuilt by TJ Horner. (http://horner.tj/hello)\nType !help for help.");
 	}
 });

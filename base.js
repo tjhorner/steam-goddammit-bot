@@ -1,5 +1,13 @@
 var config = require('./config.js');
 
+function log(message){
+	console.log("[LOG] ".green + message);
+}
+
+function warn(message){
+	console.log("[WARN] ".red + message);
+}
+
 if (typeof String.prototype.startsWith !== 'function') {
 	String.prototype.startsWith = function (str){
 		return this.slice(0, str.length) == str;
@@ -24,6 +32,13 @@ Array.prototype.contains = function(k, callback) {
 Commands = [];
 
 function processChatMessage(src, src2, msg, bot){
+	if(msg !== ""){
+		if(src2 !== undefined){
+			console.log(("[CHAT " + src + "]").blue + " [" + bot.users[src2].playerName + "] " + msg);
+		}else{
+			console.log("[CHAT]".cyan + " [" + bot.users[src].playerName + "] " + msg);
+		}
+	}
 	if(msg.startsWith("!help")){
 		bot.sendMessage(src, "---- " + config.botName + " Commands ----");
 		Commands.forEach(function(c){
@@ -32,11 +47,9 @@ function processChatMessage(src, src2, msg, bot){
 	}else{
 		Commands.forEach(function(c){
 			if(c.regex.test(msg)){
-				if(src2 !== undefined){
-					c.action(src, msg, src2);
-				}else{
-					c.action(src, msg, src);
-				}
+				var steamId = src2 !== undefined ? src2 : src;
+				c.action(src, msg, steamId);
+				log(bot.users[steamId].playerName + " did command " + c.params);
 			}
 		});
 	}
@@ -52,6 +65,15 @@ module.exports = {
 			return true;
 		return false;
 	},
+	elevatedUsers: function(bot){
+		var users = [];
+		config.elevatedUsers.forEach(function(id){
+			users.push(id);
+		});
+		return users;
+	},
+	log: log,
+	warn: warn,
 	ChatErrors: {
 		"1": "Success",
 		"2": "Room doesn't exist",
