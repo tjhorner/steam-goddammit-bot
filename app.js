@@ -116,7 +116,7 @@ app.Command(/^!lookup\b/, "!lookup [partial username]", "Find a user's SteamID b
 
 app.Command(/^!elevatedusers\b/, "!elevatedusers", "Get the profile URLs of current elevated users.", function(src, msg, steamId){
 	var message = "\nProfile URLs of elevated users:";
-	app.elevatedUsers(bot).forEach(function(user){
+	app.getElevatedUsers().forEach(function(user){
 		message += "\nhttp://steamcommunity.com/profiles/" + user;
 	});
 	bot.sendMessage(src, message);

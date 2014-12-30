@@ -29,21 +29,6 @@ if (typeof String.prototype.startsWith !== 'function') {
 	};
 }
 
-Array.prototype.contains = function(k, callback) {
-    var self = this;
-    return (function check(i) {
-        if (i >= self.length) {
-            return callback(false);
-        }
-
-        if (self[i] === k) {
-            return callback(true);
-        }
-
-        return process.nextTick(check.bind(null, i+1));
-    }(0));
-}
-
 Commands = [];
 
 function findUserByName(name, bot, onMatch){
@@ -84,23 +69,29 @@ function processChatMessage(src, src2, msg, bot){
 	}
 }
 
+function isElevated(id){
+	if(config.elevatedUsers.indexOf(id) !== -1)
+		return true;
+	return false;
+}
+
+function Command(regex, params, help, action){
+	Commands.push({regex: regex, action: action, help: help, params: params});
+}
+
+function getElevatedUsers(){
+	var users = [];
+	config.elevatedUsers.forEach(function(id){
+		users.push(id);
+	});
+	return users;
+}
+
 module.exports = {
-	Command: function(regex, params, help, action){
-		Commands.push({regex: regex, action: action, help: help, params: params});
-	},
+	Command: Command,
 	processChatMessage: processChatMessage,
-	isElevated: function(id){
-		if(config.elevatedUsers.indexOf(id) !== -1)
-			return true;
-		return false;
-	},
-	elevatedUsers: function(bot){
-		var users = [];
-		config.elevatedUsers.forEach(function(id){
-			users.push(id);
-		});
-		return users;
-	},
+	isElevated: isElevated,
+	getElevatedUsers: getElevatedUsers,
 	log: log,
 	warn: warn,
 	ChatErrors: {
