@@ -14,8 +14,38 @@ function bashEscape(s){
 
 var bot = new Steam.SteamClient();
 
-app.Command(/3/gi, "3", "No", function(src, msg, steamId){
-	bot.sendMessage(src, 'NO FUCK YOU');
+// app.Command(/3/gi, "3", "No", function(src, msg, steamId){
+// 	bot.sendMessage(src, 'NO FUCK YOU');
+// });
+
+app.Command(/^!bcast\b/, "!bcast [message]", "Broadcast a message to all encountered users (only available to elevated users)", function(src, msg, steamId){
+	if(app.isElevated(steamId)){
+		var users = 0;
+		for (var id in bot.users) {
+			users++;
+			bot.sendMessage(id, msg.substr(7));
+			app.log("Sent broadcast message to " + bot.users[id].playerName + " (" + id + ")");
+		}
+		app.log("Finished sending broadcast message to " + users + " users.");
+	}else{
+		bot.sendMessage(src, "You don't have permission to do that!");
+	}
+});
+
+app.Command(/^!tell\b/, "!tell [steamid] [message]", "Tell a user something (only available to elevated users)", function(src, msg, steamId){
+	if(app.isElevated(steamId)){
+		var args = msg.substr(6).split(" ");
+		if(args.length < 2){
+			bot.sendMessage(src, "This command requires 2 arguments!");
+			return;
+		}
+		var id = args[0];
+		args[0] = "";
+		bot.sendMessage(id, args.join(" ").trim());
+		bot.sendMessage(src, "Sending message to " + id);
+	}else{
+		bot.sendMessage(src, "You don't have permission to do that!");
+	}
 });
 
 app.Command(/^!trade\b/, "!trade", "Send a trade request", function(src, msg, steamId){

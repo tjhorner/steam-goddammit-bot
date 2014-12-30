@@ -5,6 +5,7 @@ fs.writeFile("log.txt", "");
 
 function log(message){
 	console.log("[LOG] ".green + message);
+	
 	fs.appendFile("log.txt", "[LOG] " + message + "\n", function (err) {
 		if(err) console.warn("Couldn't write to log file!");
 	});
