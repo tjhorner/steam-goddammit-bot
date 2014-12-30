@@ -109,7 +109,7 @@ app.Command(/^!myid\b/, "!myid", "Shows the SteamID of yourself and, if in a cha
 });
 
 app.Command(/^!lookup\b/, "!lookup [partial username]", "Find a user's SteamID by the first part of their username (I must have met them as a friend or in a group chat)", function(src, msg, steamId){
-	app.findUserByName(msg.substr(8).toLowerCase(), bot, function(user){
+	app.findUserByName(msg.substr(8), bot, function(user){
 		bot.sendMessage(src, "\nMatch:\nUsername: " + user.playerName + "\nSteamID: " + user.friendid);
 	});
 });
