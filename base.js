@@ -48,7 +48,12 @@ function processChatMessage(src, src2, msg, bot){
 		Commands.forEach(function(c){
 			if(c.regex.test(msg)){
 				var steamId = src2 !== undefined ? src2 : src;
-				c.action(src, msg, steamId);
+				try{
+					c.action(src, msg, steamId);
+				}catch(e){
+					bot.sendMessage(src, "You broke something:\n" + e);
+					warn("Error in command " + c.params + ": " + e);
+				}
 				log(bot.users[steamId].playerName + " did command " + c.params);
 			}
 		});
