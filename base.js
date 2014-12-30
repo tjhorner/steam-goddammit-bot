@@ -1,11 +1,26 @@
-var config = require('./config.js');
+var fs = require('fs');
+
+// clear log
+fs.writeFile("log.txt", "");
 
 function log(message){
 	console.log("[LOG] ".green + message);
+	fs.appendFile("log.txt", "[LOG] " + message + "\n", function (err) {
+		if(err) console.warn("Couldn't write to log file!");
+	});
 }
 
 function warn(message){
 	console.log("[WARN] ".red + message);
+	fs.appendFile("log.txt", "[WARN] " + message + "\n", function (err) {
+		if(err) console.warn("Couldn't write to log file!");
+	});
+}
+
+try{
+	var config = require('./config.js');
+}catch(e){
+	warn('No config.js found!');
 }
 
 if (typeof String.prototype.startsWith !== 'function') {
@@ -34,9 +49,9 @@ Commands = [];
 function processChatMessage(src, src2, msg, bot){
 	if(msg !== ""){
 		if(src2 !== undefined){
-			console.log(("[CHAT " + src + "]").blue + " [" + bot.users[src2].playerName + "] " + msg);
+			log(("[CHAT " + src + "]") + " [" + bot.users[src2].playerName + "] " + msg);
 		}else{
-			console.log("[CHAT]".cyan + " [" + bot.users[src].playerName + "] " + msg);
+			log("[CHAT]" + " [" + bot.users[src].playerName + "] " + msg);
 		}
 	}
 	if(msg.startsWith("!help")){
@@ -94,5 +109,6 @@ module.exports = {
 		"12": "Ranking data was not set",
 		"13": "Ranking data was not set",
 		"14": "My rank is invalid"
-	}
+	},
+	config: config
 };

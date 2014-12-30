@@ -1,14 +1,9 @@
+var app = require('./base.js');
 var Steam = require('steam');
-var fs = require('fs');
 var os = require('os');
+var fs = require('fs');
 var colors = require('colors');
 
-var app = require('./base.js');
-try{
-	var config = require('./config.js');
-}catch(e){
-	console.error('No config.js found!')
-}
 var chatRooms = [];
 
 function bashEscape(s){
@@ -93,25 +88,25 @@ fs.readFile('.sentry', function(e, d){
 	if(e){
 		app.warn("No sentry file found, you may need to use a SteamGuard code.");
 		bot.logOn({
-			accountName: config.steamUsername,
-			password: config.steamPassword
+			accountName: app.config.steamUsername,
+			password: app.config.steamPassword
 		});
 	}else{
 		bot.logOn({
-			accountName: config.steamUsername,
-			password: config.steamPassword,
+			accountName: app.config.steamUsername,
+			password: app.config.steamPassword,
 			shaSentryfile: d
 		});
 	}
 });
 
 bot.on('loggedOn', function(){
-	app.log("Successfully logged in! Clearing Steam password from config...");
-	config.steamPassword = null;
+	app.log("Successfully logged in! Clearing Steam password from app.config...");
+	app.config.steamPassword = null;
 	bot.setPersonaState(Steam.EPersonaState.Online);
-	bot.setPersonaName(config.botName); // You may want to comment this out if you're restarting a lot.
+	bot.setPersonaName(app.config.botName); // You may want to comment this out if you're restarting a lot.
 	app.log("Joining bot community chat...");
-	bot.joinChat(config.communityChatId);
+	bot.joinChat(app.config.communityChatId);
 });
 
 bot.on('sentry', function(s){
@@ -135,7 +130,7 @@ bot.on('friend', function(steamId, relation){
 			bot.addFriend(steamId);
 			setTimeout(function(){
 				var newFriend = bot.users[steamId].playerName;
-				bot.sendMessage(steamId, "Hi " + newFriend + "! I'm " + config.botName + ". I can do many things. Type !help for more info.");
+				bot.sendMessage(steamId, "Hi " + newFriend + "! I'm " + app.config.botName + ". I can do many things. Type !help for more info.");
 				app.log("New friend! " + steamId + " (" + newFriend + ")");
 				// exec('notify-send "' + bashEscape('New Friend!') + '" "' + bashEscape(newFriend) + '"');
 			}, 2000);
@@ -150,6 +145,6 @@ bot.on('chatEnter', function(chatId, response){
 		chatRooms[chatId] = "";
 	}else{
 		app.log("Joined chat room " + chatId);
-		bot.sendMessage(chatId, "\n" + config.botName + " online with Node.js " + process.version + ".\nBuilt by TJ Horner. (http://horner.tj/hello)\nType !help for help.");
+		bot.sendMessage(chatId, "\n" + app.config.botName + " online with Node.js " + process.version + ".\nBuilt by TJ Horner. (http://horner.tj/hello)\nType !help for help.");
 	}
 });

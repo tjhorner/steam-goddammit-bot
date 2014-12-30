@@ -1,4 +1,5 @@
 config.js
 .sentry
+log.txt
 
 /node_modules
