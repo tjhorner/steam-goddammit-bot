@@ -87,6 +87,15 @@ function getElevatedUsers(){
 	return users;
 }
 
+function getCommandHelp(separator){
+	separator = separator || "\n";
+	var separated = "";
+	Commands.forEach(function(c){
+		separated += c.params + " - " + c.help + separator;
+	});
+	return separated;
+}
+
 module.exports = {
 	Command: Command,
 	processChatMessage: processChatMessage,
@@ -94,6 +103,7 @@ module.exports = {
 	getElevatedUsers: getElevatedUsers,
 	log: log,
 	warn: warn,
+	getCommandHelp: getCommandHelp,
 	ChatErrors: {
 		"1": "Success",
 		"2": "Room doesn't exist",

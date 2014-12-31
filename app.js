@@ -1,8 +1,14 @@
-var app = require('./base.js');
-var Steam = require('steam');
-var os = require('os');
-var fs = require('fs');
-var colors = require('colors');
+var app = require('./base.js'),
+	Steam = require('steam'),
+	os = require('os'),
+	fs = require('fs'),
+	colors = require('colors'),
+	express = require('express')(),
+	mustache = require('mustache');
+
+var pageTemplate = "<h1>{{botName}} is online!</h1>Running node.js version {{nodeVersion}}" +
+				   "<h2>Commands</h2>{{{commands}}}" +
+				   "{{#communityGroupId}}<h2>Community</h2><a href='http://steamcommunity.com/groups/{{communityGroupId}}'>{{botName}} Steam Group</a>{{/communityGroupId}}";
 
 var chatRooms = [];
 
@@ -189,4 +195,15 @@ bot.on('chatEnter', function(chatId, response){
 		app.log("Joined chat room " + chatId);
 		bot.sendMessage(chatId, "\n" + app.config.botName + " online with Node.js " + process.version + ".\nBuilt by TJ Horner. (http://horner.tj/hello)\nType !help for help.");
 	}
+});
+
+express.get('/', function(req, res){
+	res.send(mustache.render(pageTemplate, { botName: app.config.botName,
+											 commands: app.getCommandHelp("<br>"),
+											 communityGroupId: app.config.communityGroupId,
+											 nodeVersion: process.version }));
+});
+
+var server = express.listen(parseInt(process.env.ENV_PORT) || 3000, function(){
+	app.log("Web server is up and running");
 });

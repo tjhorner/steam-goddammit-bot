@@ -9,6 +9,8 @@
   },
   "dependencies": {
     "colors": "^1.0.3",
+    "express": "^4.10.6",
+    "mustache": "^1.0.0",
     "steam": "~0.6.7"
   }
 }
