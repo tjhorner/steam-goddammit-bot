@@ -20,7 +20,11 @@ function warn(message){
 try{
 	var config = require('./config.js');
 }catch(e){
-	warn('No config.js found!');
+	warn('No config.js found, looking for config in STEAMBOT_CONFIG env variable...');
+	if(process.env.STEAMBOT_CONFIG){
+		var config = JSON.parse(process.env.STEAMBOT_CONFIG);
+		log('Found config in STEAMBOT_CONFIG')
+	}
 }
 
 if (typeof String.prototype.startsWith !== 'function') {
