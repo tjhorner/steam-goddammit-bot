@@ -204,6 +204,6 @@ express.get('/', function(req, res){
 											 nodeVersion: process.version }));
 });
 
-var server = express.listen(parseInt(process.env.ENV_PORT) || 3000, function(){
+var server = express.listen(process.env.PORT || 3000, function(){
 	app.log("Web server is up and running");
 });
