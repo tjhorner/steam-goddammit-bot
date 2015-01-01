@@ -23,7 +23,7 @@ try{
 	warn('No config.js found, looking for config in STEAMBOT_CONFIG env variable...');
 	if(process.env.STEAMBOT_CONFIG){
 		var config = JSON.parse(process.env.STEAMBOT_CONFIG);
-		log('Found config in STEAMBOT_CONFIG')
+		log('Found config in STEAMBOT_CONFIG');
 	}
 }
 

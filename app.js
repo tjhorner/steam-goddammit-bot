@@ -60,6 +60,17 @@ app.Command(/^!tell\b/, "!tell [steamid] [message]", "Tell a user something (onl
 	}
 });
 
+app.Command(/^!join\b/, "!join [chatid]", "Join a chat (only available to elevated users)", function(src, msg, steamId){
+	if(app.isElevated(steamId)){
+		bot.joinChat(msg.substr(6));
+		app.log("Joining chat room " + msg.substr(6));
+		bot.sendMessage(src, "Joining " + msg.substr(6) + "...");
+		chatRooms[msg.substr(6)] = steamId;
+	}else{
+		bot.sendMessage(src, "You don't have permission to do that!");
+	}
+});
+
 app.Command(/^!trade\b/, "!trade", "Send a trade request", function(src, msg, steamId){
 	bot.sendMessage(src, "I can't send trade requests right now, sorry."); // Change this message and uncomment below line if account has unlimited access
 	// bot.trade(steamId);
