@@ -1,0 +1,17 @@
+body{
+  background: #3A3632;
+  color: white;
+}
+
+.left, .right{
+  position: absolute;
+  display: inline-block;
+  min-width: 200px;
+  min-height: 50%;
+  border: 1px solid white;
+}
+
+.right{
+  min-width: 500px;
+  left: 209px;
+}

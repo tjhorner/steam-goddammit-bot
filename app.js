@@ -3,8 +3,17 @@ var app = require('./base.js'),
 	os = require('os'),
 	fs = require('fs'),
 	colors = require('colors'),
-	express = require('express')(),
+	ex = require('express'),
+	express = ex(),
+	server = require('http').Server(express),
+	io = require('socket.io')(server),
 	mustache = require('mustache');
+
+express.get('/', function(req, res){
+	res.sendfile('www/index.html');
+});
+
+express.use(ex.static(__dirname + '/www'));
 
 var pageTemplate = "<h1>{{botName}} is online!</h1>Running node.js version {{nodeVersion}}" +
 				   "<h2>Commands</h2>{{{commands}}}" +
@@ -163,7 +172,7 @@ bot.on('loggedOn', function(){
 	app.log("Successfully logged in! Clearing Steam password from app.config...");
 	app.config.steamPassword = null;
 	bot.setPersonaState(Steam.EPersonaState.Online);
-	bot.setPersonaName(app.config.botName); // You may want to comment this out if you're restarting a lot.
+	// bot.setPersonaName(app.config.botName); // You may want to comment this out if you're restarting a lot.
 	app.log("Joining bot community chat...");
 	bot.joinChat(app.config.communityChatId);
 });
@@ -172,8 +181,15 @@ bot.on('sentry', function(s){
 	fs.writeFile('.sentry', s);
 });
 
-bot.on('message', function(source, message, type, chatter){
-	app.processChatMessage(source, chatter, message, bot);
+bot.on('message', function(source, message, type, source2){
+	app.processChatMessage(source, source2, message, bot);
+	var socketObj = {message: message};
+	if(source2 !== undefined){
+		socketObj.user = bot.users[source2];
+	}else{
+		socketObj.user = bot.users[source];
+	}
+	io.emit('bot:message:receive', socketObj);
 });
 
 bot.on('chatInvite', function(chatId, chatName, inviterId){
@@ -191,6 +207,7 @@ bot.on('friend', function(steamId, relation){
 				var newFriend = bot.users[steamId].playerName;
 				bot.sendMessage(steamId, "Hi " + newFriend + "! I'm " + app.config.botName + ". I can do many things. Type !help for more info.");
 				app.log("New friend! " + steamId + " (" + newFriend + ")");
+				io.emit('bot:update', {users: bot.users});
 				// exec('notify-send "' + bashEscape('New Friend!') + '" "' + bashEscape(newFriend) + '"');
 			}, 2000);
 			break;
@@ -208,13 +225,10 @@ bot.on('chatEnter', function(chatId, response){
 	}
 });
 
-express.get('/', function(req, res){
-	res.send(mustache.render(pageTemplate, { botName: app.config.botName,
-											 commands: app.getCommandHelp("<br>"),
-											 communityGroupId: app.config.communityGroupId,
-											 nodeVersion: process.version }));
+io.on('connection', function(socket){
+	socket.emit('bot:update', {botname: app.config.botName, users: bot.users});
 });
 
-var server = express.listen(process.env.PORT || 3000, function(){
-	app.log("Web server is up and running");
+server.listen(process.env.PORT || 3000, function(){
+  console.log('listening on *:3000');
 });
